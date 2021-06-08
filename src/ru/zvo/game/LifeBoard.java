@@ -1,7 +1,5 @@
 package ru.zvo.game;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Random;
 
 public class LifeBoard {
@@ -10,17 +8,59 @@ public class LifeBoard {
     private int[][] currentGeneration;
     private final Random random;
 
-    public LifeBoard(int rows, int columns) throws NoSuchAlgorithmException {
-        random = SecureRandom.getInstanceStrong();
+    public LifeBoard(int rows, int columns, FiguresTypes figureType) {
+        random = new Random();
         currentGeneration = new int[rows][columns];
-        this.fillPlayField();
+        this.fillPlayField(figureType);
     }
 
     public int[][] getCurrentGeneration() {
-        return currentGeneration;
+        return currentGeneration.clone();
     }
 
-    private void fillPlayField() {
+    private void fillPlayField(FiguresTypes figureType) {
+        switch (figureType) {
+            case GLIDER:
+                fillPlayFieldWithGlider();
+                break;
+            case BLINKER:
+                fillPlayFieldWithBlinker();
+                break;
+            case BEACON:
+                fillPlayFieldWithBeacon();
+                break;
+            default:
+                fillPlayFieldRandomly();
+                break;
+        }
+    }
+
+    private void fillPlayFieldWithBeacon() {
+        currentGeneration[0][0] = 1;
+        currentGeneration[0][1] = 1;
+        currentGeneration[1][0] = 1;
+        currentGeneration[1][1] = 1;
+        currentGeneration[2][2] = 1;
+        currentGeneration[2][3] = 1;
+        currentGeneration[3][2] = 1;
+        currentGeneration[3][3] = 1;
+    }
+
+    private void fillPlayFieldWithBlinker() {
+        currentGeneration[2][1] = 1;
+        currentGeneration[2][2] = 1;
+        currentGeneration[2][3] = 1;
+    }
+
+    private void fillPlayFieldWithGlider() {
+        currentGeneration[0][0] = 1;
+        currentGeneration[1][1] = 1;
+        currentGeneration[1][2] = 1;
+        currentGeneration[2][0] = 1;
+        currentGeneration[2][1] = 1;
+    }
+
+    private void fillPlayFieldRandomly() {
         for (int i = 0; i < currentGeneration.length; i++) {
             for (int j = 0; j < currentGeneration[i].length; j++) {
                 currentGeneration[i][j] = random.nextInt(2);
@@ -36,14 +76,14 @@ public class LifeBoard {
             }
         }
         currentGeneration = nextGeneration;
-        return nextGeneration;
+        return nextGeneration.clone();
     }
 
     private int defineNextGenerationCellValue(int cell, int aliveNeighborsAmount) {
         if (cell == 1) {
             return defineAliveCellNextState(aliveNeighborsAmount);
         } else {
-            return  defineDeadCellNextState(aliveNeighborsAmount);
+            return defineDeadCellNextState(aliveNeighborsAmount);
         }
     }
 
